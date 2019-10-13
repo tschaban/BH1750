@@ -8,6 +8,9 @@
 
   Written by Christopher Laws, March, 2013.
 
+  Modifications by https://github.com/tschaban
+  - Added I2C GPIOs configuration
+
 */
 
 #include "BH1750.h"
@@ -47,7 +50,9 @@
  *
  * On most sensor boards, it was 0x76
  */
-BH1750LightSensor::BH1750LightSensor() {}
+BH1750LightSensor::BH1750LightSensor() {
+
+}
 
 /**
  * Configure sensor
@@ -62,6 +67,14 @@ bool BH1750LightSensor::begin(Mode mode, byte addr) {
   // Configure sensor in specified mode
   return configure(mode);
 }
+
+/**
+ * Configure Wire GPIOs
+ * @param SDA,SCL GPIOs
+ */
+  void BH1750LightSensor::setI2C(uint8_t sda, uint8_t scl) {
+    Wire.begin(sda,scl);
+  }
 
 /**
  * Configure BH1750 with specified mode

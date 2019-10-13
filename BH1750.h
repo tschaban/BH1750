@@ -65,6 +65,7 @@ public:
 
   BH1750LightSensor();
   bool begin(Mode mode = CONTINUOUS_HIGH_RES_MODE, byte addr = 0x23);
+  void setI2C(uint8_t sda, uint8_t scl);
   bool configure(Mode mode);
   bool setMTreg(byte MTreg);
   float readLightLevel(bool maxWait = false);
