@@ -11,20 +11,15 @@
 
   Written by Christopher Laws, March, 2013.
 
-  ---- Modification
-  @tschabn:
-  - Class name change due to the conflict with naming convention in AFE Firmware
-  - Constructor changed
-
 */
 
 #ifndef BH1750_h
 #define BH1750_h
 
 #if (ARDUINO >= 100)
-#include <Arduino.h>
+#  include <Arduino.h>
 #else
-#include <WProgram.h>
+#  include <WProgram.h>
 #endif
 
 #include "Wire.h"
@@ -44,10 +39,11 @@
 // Default MTreg value
 #define BH1750_DEFAULT_MTREG 69
 
-class BH1750LightSensor {
+class BH1750 {
 
 public:
   enum Mode {
+    // same as Power Down
     UNCONFIGURED = 0,
     // Measurement at 1 lux resolution. Measurement time is approx 120ms.
     CONTINUOUS_HIGH_RES_MODE = 0x10,
@@ -63,12 +59,13 @@ public:
     ONE_TIME_LOW_RES_MODE = 0x23
   };
 
-  BH1750LightSensor();
-  bool begin(Mode mode = CONTINUOUS_HIGH_RES_MODE, byte addr = 0x23);
-  void setI2C(uint8_t sda, uint8_t scl);
+  BH1750(byte addr = 0x23);
+  bool begin(Mode mode = CONTINUOUS_HIGH_RES_MODE, byte addr = 0x23,
+             TwoWire* i2c = nullptr);
   bool configure(Mode mode);
   bool setMTreg(byte MTreg);
-  float readLightLevel(bool maxWait = false);
+  bool measurementReady(bool maxWait = false);
+  float readLightLevel();
 
 private:
   byte BH1750_I2CADDR;
@@ -78,6 +75,8 @@ private:
   // for more information.
   const float BH1750_CONV_FACTOR = 1.2;
   Mode BH1750_MODE = UNCONFIGURED;
+  TwoWire* I2C;
+  unsigned long lastReadTimestamp;
 };
 
 #endif
