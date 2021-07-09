@@ -30,18 +30,18 @@
 #define _delay_ms(ms) delay(ms)
 #endif
 
-// Legacy Wire.write() function fix
+// Legacy WirePort->write() function fix
 #if (ARDUINO >= 100)
-#define __wire_write(d) Wire.write(d)
+#define __wire_write(d) WirePort->write(d)
 #else
-#define __wire_write(d) Wire.send(d)
+#define __wire_write(d) WirePort->send(d)
 #endif
 
-// Legacy Wire.read() function fix
+// Legacy WirePort->read() function fix
 #if (ARDUINO >= 100)
-#define __wire_read() Wire.read()
+#define __wire_read() WirePort->read()
 #else
-#define __wire_read() Wire.receive()
+#define __wire_read() WirePort->receive()
 #endif
 
 /**
@@ -58,9 +58,10 @@ BH1750LightSensor::BH1750LightSensor() {
  * Configure sensor
  * @param mode Measurement mode
  */
-bool BH1750LightSensor::begin(Mode mode, byte addr) {
+bool BH1750LightSensor::begin(Mode mode, byte addr, TwoWire *wirePort) {
 
   BH1750_I2CADDR = addr;
+  WirePort = wirePort;
 
   // I2C is expected to be initialized outside this library
 
@@ -68,13 +69,6 @@ bool BH1750LightSensor::begin(Mode mode, byte addr) {
   return configure(mode);
 }
 
-/**
- * Configure Wire GPIOs
- * @param SDA,SCL GPIOs
- */
-  void BH1750LightSensor::setI2C(uint8_t sda, uint8_t scl) {
-    Wire.begin(sda,scl);
-  }
 
 /**
  * Configure BH1750 with specified mode
@@ -96,9 +90,9 @@ bool BH1750LightSensor::configure(Mode mode) {
   case BH1750LightSensor::ONE_TIME_LOW_RES_MODE:
 
     // Send mode to sensor
-    Wire.beginTransmission(BH1750_I2CADDR);
+    WirePort->beginTransmission(BH1750_I2CADDR);
     __wire_write((uint8_t)BH1750_MODE);
-    ack = Wire.endTransmission();
+    ack = WirePort->endTransmission();
 
     // Wait a few moments to wake up
     _delay_ms(10);
@@ -152,15 +146,15 @@ bool BH1750LightSensor::setMTreg(byte MTreg) {
   // Send MTreg and the current mode to the sensor
   //   High bit: 01000_MT[7,6,5]
   //    Low bit: 011_MT[4,3,2,1,0]
-  Wire.beginTransmission(BH1750_I2CADDR);
+  WirePort->beginTransmission(BH1750_I2CADDR);
   __wire_write((0b01000 << 3) | (MTreg >> 5));
-  ack = Wire.endTransmission();
-  Wire.beginTransmission(BH1750_I2CADDR);
+  ack = WirePort->endTransmission();
+  WirePort->beginTransmission(BH1750_I2CADDR);
   __wire_write((0b011 << 5) | (MTreg & 0b111));
-  ack = ack | Wire.endTransmission();
-  Wire.beginTransmission(BH1750_I2CADDR);
+  ack = ack | WirePort->endTransmission();
+  WirePort->beginTransmission(BH1750_I2CADDR);
   __wire_write(BH1750_MODE);
-  ack = ack | Wire.endTransmission();
+  ack = ack | WirePort->endTransmission();
 
   // Wait a few moments to wake up
   _delay_ms(10);
@@ -221,9 +215,9 @@ float BH1750LightSensor::readLightLevel(bool maxWait) {
   float level = -1.0;
 
   // Send mode to sensor
-  Wire.beginTransmission(BH1750_I2CADDR);
+  WirePort->beginTransmission(BH1750_I2CADDR);
   __wire_write((uint8_t)BH1750_MODE);
-  Wire.endTransmission();
+  WirePort->endTransmission();
 
   // Wait for measurement to be taken.
   // Measurements have a maximum measurement time and a typical measurement
@@ -252,7 +246,7 @@ float BH1750LightSensor::readLightLevel(bool maxWait) {
 
   // Read two bytes from the sensor, which are low and high parts of the sensor
   // value
-  if (2 == Wire.requestFrom((int)BH1750_I2CADDR, (int)2)) {
+  if (2 == WirePort->requestFrom((int)BH1750_I2CADDR, (int)2)) {
     unsigned int tmp = 0;
     tmp = __wire_read();
     tmp <<= 8;

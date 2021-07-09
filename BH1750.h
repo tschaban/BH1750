@@ -64,8 +64,8 @@ public:
   };
 
   BH1750LightSensor();
-  bool begin(Mode mode = CONTINUOUS_HIGH_RES_MODE, byte addr = 0x23);
-  void setI2C(uint8_t sda, uint8_t scl);
+  bool begin(Mode mode = CONTINUOUS_HIGH_RES_MODE, byte addr = 0x23, TwoWire *wirePort);
+
   bool configure(Mode mode);
   bool setMTreg(byte MTreg);
   float readLightLevel(bool maxWait = false);
@@ -78,6 +78,8 @@ private:
   // for more information.
   const float BH1750_CONV_FACTOR = 1.2;
   Mode BH1750_MODE = UNCONFIGURED;
+
+  TwoWire *WirePort;
 };
 
 #endif
