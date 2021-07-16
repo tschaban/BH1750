@@ -13,8 +13,8 @@
 
 */
 
-#ifndef BH1750_h
-#define BH1750_h
+#ifndef BH1750LightSensor_h
+#define BH1750LightSensor_h
 
 #if (ARDUINO >= 100)
 #  include <Arduino.h>
@@ -25,7 +25,7 @@
 #include "Wire.h"
 
 // Uncomment, to enable debug messages
-// #define BH1750_DEBUG
+//#define BH1750_DEBUG
 
 // No active state
 #define BH1750_POWER_DOWN 0x00
@@ -39,7 +39,7 @@
 // Default MTreg value
 #define BH1750_DEFAULT_MTREG 69
 
-class BH1750 {
+class BH1750LightSensor {
 
 public:
   enum Mode {
@@ -59,7 +59,7 @@ public:
     ONE_TIME_LOW_RES_MODE = 0x23
   };
 
-  BH1750(byte addr = 0x23);
+  BH1750LightSensor(byte addr = 0x23);
   bool begin(Mode mode = CONTINUOUS_HIGH_RES_MODE, byte addr = 0x23,
              TwoWire* i2c = nullptr);
   bool configure(Mode mode);

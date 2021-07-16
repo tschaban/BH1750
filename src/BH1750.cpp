@@ -47,7 +47,7 @@
  *
  * On most sensor boards, it was 0x76
  */
-BH1750::BH1750(byte addr) {
+BH1750LightSensor::BH1750LightSensor(byte addr) {
 
   BH1750_I2CADDR = addr;
   // Allows user to change TwoWire instance
@@ -60,7 +60,7 @@ BH1750::BH1750(byte addr) {
  * @param addr Address of the sensor
  * @param i2c TwoWire instance connected to I2C bus
  */
-bool BH1750::begin(Mode mode, byte addr, TwoWire* i2c) {
+bool BH1750LightSensor::begin(Mode mode, byte addr, TwoWire* i2c) {
 
   // I2C is expected to be initialized outside this library
   // But, allows a different address and TwoWire instance to be used
@@ -79,7 +79,7 @@ bool BH1750::begin(Mode mode, byte addr, TwoWire* i2c) {
  * Configure BH1750 with specified mode
  * @param mode Measurement mode
  */
-bool BH1750::configure(Mode mode) {
+bool BH1750LightSensor::configure(Mode mode) {
 
   // default transmission result to a value out of normal range
   byte ack = 5;
@@ -87,12 +87,12 @@ bool BH1750::configure(Mode mode) {
   // Check measurement mode is valid
   switch (mode) {
 
-  case BH1750::CONTINUOUS_HIGH_RES_MODE:
-  case BH1750::CONTINUOUS_HIGH_RES_MODE_2:
-  case BH1750::CONTINUOUS_LOW_RES_MODE:
-  case BH1750::ONE_TIME_HIGH_RES_MODE:
-  case BH1750::ONE_TIME_HIGH_RES_MODE_2:
-  case BH1750::ONE_TIME_LOW_RES_MODE:
+  case BH1750LightSensor::CONTINUOUS_HIGH_RES_MODE:
+  case BH1750LightSensor::CONTINUOUS_HIGH_RES_MODE_2:
+  case BH1750LightSensor::CONTINUOUS_LOW_RES_MODE:
+  case BH1750LightSensor::ONE_TIME_HIGH_RES_MODE:
+  case BH1750LightSensor::ONE_TIME_HIGH_RES_MODE_2:
+  case BH1750LightSensor::ONE_TIME_LOW_RES_MODE:
 
     // Send mode to sensor
     I2C->beginTransmission(BH1750_I2CADDR);
@@ -142,7 +142,7 @@ bool BH1750::configure(Mode mode) {
  * @return bool true if MTReg successful set
  * 		false if MTreg not changed or parameter out of range
  */
-bool BH1750::setMTreg(byte MTreg) {
+bool BH1750LightSensor::setMTreg(byte MTreg) {
   // Bug: lowest value seems to be 32!
   if (MTreg <= 31 || MTreg > 254) {
     Serial.println(F("[BH1750] ERROR: MTreg out of range"));
@@ -196,18 +196,18 @@ bool BH1750::setMTreg(byte MTreg) {
  * @return a boolean if a new measurement is possible
  *
  */
-bool BH1750::measurementReady(bool maxWait) {
+bool BH1750LightSensor::measurementReady(bool maxWait) {
   unsigned long delaytime = 0;
   switch (BH1750_MODE) {
-  case BH1750::CONTINUOUS_HIGH_RES_MODE:
-  case BH1750::CONTINUOUS_HIGH_RES_MODE_2:
-  case BH1750::ONE_TIME_HIGH_RES_MODE:
-  case BH1750::ONE_TIME_HIGH_RES_MODE_2:
+  case BH1750LightSensor::CONTINUOUS_HIGH_RES_MODE:
+  case BH1750LightSensor::CONTINUOUS_HIGH_RES_MODE_2:
+  case BH1750LightSensor::ONE_TIME_HIGH_RES_MODE:
+  case BH1750LightSensor::ONE_TIME_HIGH_RES_MODE_2:
     maxWait ? delaytime = (180 * BH1750_MTreg / (byte)BH1750_DEFAULT_MTREG)
             : delaytime = (120 * BH1750_MTreg / (byte)BH1750_DEFAULT_MTREG);
     break;
-  case BH1750::CONTINUOUS_LOW_RES_MODE:
-  case BH1750::ONE_TIME_LOW_RES_MODE:
+  case BH1750LightSensor::CONTINUOUS_LOW_RES_MODE:
+  case BH1750LightSensor::ONE_TIME_LOW_RES_MODE:
     // Send mode to sensor
     maxWait ? delaytime = (24 * BH1750_MTreg / (byte)BH1750_DEFAULT_MTREG)
             : delaytime = (16 * BH1750_MTreg / (byte)BH1750_DEFAULT_MTREG);
@@ -237,7 +237,7 @@ bool BH1750::measurementReady(bool maxWait) {
  * 	   -1 : no valid return value
  * 	   -2 : sensor not configured
  */
-float BH1750::readLightLevel() {
+float BH1750LightSensor::readLightLevel() {
 
   if (BH1750_MODE == UNCONFIGURED) {
     Serial.println(F("[BH1750] Device is not configured!"));
@@ -274,8 +274,8 @@ float BH1750::readLightLevel() {
           String((float)((byte)BH1750_DEFAULT_MTREG / (float)BH1750_MTreg)));
 #endif
     }
-    if (BH1750_MODE == BH1750::ONE_TIME_HIGH_RES_MODE_2 ||
-        BH1750_MODE == BH1750::CONTINUOUS_HIGH_RES_MODE_2) {
+    if (BH1750_MODE == BH1750LightSensor::ONE_TIME_HIGH_RES_MODE_2 ||
+        BH1750_MODE == BH1750LightSensor::CONTINUOUS_HIGH_RES_MODE_2) {
       level /= 2;
     }
     // Convert raw value to lux
